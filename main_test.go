@@ -104,7 +104,7 @@ func TestStaticFileServer(t *testing.T) {
 	mockServer := httptest.NewServer(r)
 
 	// hit the /assets endpoint
-	resp, err := http.Get(mockServer.URL + "/assets")
+	resp, err := http.Get(mockServer.URL + "/assets/")
 	if err != nil {
 		t.Fatal(err)
 	}
