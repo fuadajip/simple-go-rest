@@ -1,10 +1,20 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "developer"
+	password = "developer"
+	dbname   = "sample_go_rest"
 )
 
 func muxRouter() *mux.Router {
@@ -31,6 +41,24 @@ func muxRouter() *mux.Router {
 }
 
 func main() {
+	fmt.Println("Starting server...")
+	connString := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	db, err := sql.Open("postgres", connString)
+
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+
+	if err != nil {
+		panic(err)
+	}
+
+	InitStore(&dbStore{db: db})
+
 	r := muxRouter()
 
 	http.ListenAndServe(":8080", r)

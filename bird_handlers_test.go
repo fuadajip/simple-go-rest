@@ -11,10 +11,14 @@ import (
 )
 
 func TestGetBirdHandler(t *testing.T) {
+	// Initialize the moc store
+	mockStore := InitMockStore()
 
-	birds = []Bird{
-		{"sparrow", "A small harmless bird"},
-	}
+	/* Define the data that we want to return when the mocks `GetBirds` method is
+	called
+	Also, we expect it to be called only once
+	*/
+	mockStore.On("GetBirds").Return([]*Bird{{"sparrow", "A small harmless bird"}}, nil).Once()
 
 	req, err := http.NewRequest("GET", "", nil)
 	if err != nil {
@@ -48,9 +52,14 @@ func TestGetBirdHandler(t *testing.T) {
 }
 
 func TestCreateBirdsHandler(t *testing.T) {
-	birds = []Bird{
-		{"sparrow", "A small harmless bird"},
-	}
+
+	mockStore := InitMockStore()
+	/*
+	 Similarly, we define our expectations for th `CreateBird` method.
+	 We expect the first argument to the method to be the bird struct
+	 defined below, and tell the mock to return a `nil` error
+	*/
+	mockStore.On("CreateBird", &Bird{"eagle", "A bird of prey"}).Return(nil)
 
 	form := newCreateBirdForm()
 	req, err := http.NewRequest("POST", "", bytes.NewBufferString(form.Encode()))
@@ -70,15 +79,7 @@ func TestCreateBirdsHandler(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusFound)
 	}
 
-	expected := Bird{
-		"eagle",
-		"A bird of prey",
-	}
-
-	actual := birds[1]
-	if actual != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", actual, expected)
-	}
+	mockStore.AssertExpectations(t)
 }
 
 func newCreateBirdForm() *url.Values {

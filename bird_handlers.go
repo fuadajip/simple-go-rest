@@ -14,9 +14,10 @@ type (
 	}
 )
 
-var birds []Bird
-
 func getBirdHandler(w http.ResponseWriter, r *http.Request) {
+
+	birds, err := store.GetBirds()
+
 	// convert "birds" variable to json
 	birdListBytes, err := json.Marshal(birds)
 	if err != nil {
@@ -43,7 +44,10 @@ func createBirdHandler(w http.ResponseWriter, r *http.Request) {
 	bird.Description = r.Form.Get("description")
 
 	// appen bird data to existing list as temporary db
-	birds = append(birds, bird)
+	err = store.CreateBird(&bird)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	http.Redirect(w, r, "/assets/", http.StatusFound)
 }
